@@ -10,36 +10,64 @@ tags: ["R Markdown", "plot", "regression"]
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE)
 ```
+
 # Abstract
-this is abstract.
+This study used COVID-19 database from Toronto Open Data Portal @citetoronto. We investigated the infection rate between age groups, and the source of infection.
 
 # Part I: Introduction
-We use @citetidyverse.
+The Toronto Public Health department published data collected for COVID-19 to respond to the ongoing pandemic. Information contained in this dataset are extracted from the provincial communicable disease reporting system (iPHIS) and Toronto's custom COVID-19 case management system (CORES).
 
-# Part II: Data Introduction
-Introduce the scenario and the objective of the analysis.
-Data summary.
+We can see from the data that the major source of infection is close contact, and younger adults are at higher rate of getting infected @citetidyverse. Although this contradicts with what previously believed, the elderly and those with preexisting medical condition are more prone to coronavirus infection, the data we see here is not hard to understand, considering the youth protest happening in Toronto. Group gathering event like this significantly increased the spreading rate of the virus.From what is currently available, majority of the cases have been resolved. 
 
-You can embed an R code chunk like this:
+# Limitation and Future Direction
+Weekly updates of this dataset provides us the newest information of the trend of the ongoing issue, but it also limits a overview of the trend of the pandemic because the dataset is updated weekly without preservation of the previous information. 
 
-```{r cars}
-summary(cars)
-fit <- lm(dist ~ speed, data = cars)
-fit
+Future studies should look for data covering a longer time range instead of a fixed period in order for us to find the pattern of recovering and perhaps make prediction for future trend. 
+
+# Plots Analysis
+
+```{r}
+install.packages("opendatatoronto")
+library(opendatatoronto)
+install.packages("devtools")
+library(devtools)
+
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("dplyr")
+library(dplyr)
+
+# get package
+package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
+package
+
+# get all resources for this package
+resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
+resources
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+data <- filter(datastore_resources, row_number()==1) %>% get_resource()
 ```
 
-# Including Plots
 
-You can also embed plots. See Figure \@ref(fig:pie) for example:
+```{r}
+names(data)[names(data) == "Age Group"] <- "Age"
+ggplot(data, aes(x = Age)) + geom_bar(width = 0.5)
+```
+People who are at high risk of testing COVID-19 positive range from age 20 to 60 year old, especially adult age from 20 to 29 years old. Older adults are less prone to the risk of infection. Children and teenagers younger than 19 years old are not included in this survey.
 
-```{r pie, fig.cap='A fancy pie chart.', tidy=FALSE}
-par(mar = c(0, 1, 0, 1))
-pie(
-  c(280, 60, 20),
-  c('Sky', 'Sunny side of pyramid', 'Shady side of pyramid'),
-  col = c('#0292D8', '#F7EA39', '#C4B632'),
-  init.angle = -50, border = NA
-)
+```{r}
+names(data)[names(data) == "Source of Infection"] <- "Source"
+ggplot(data, aes(x = Source)) + geom_bar(width = 0.5)
+```
+From this chart we can see that majority of the infection are caused by close contact and unknown reason associated with the outbreak. 
+Comparing with what we see in the age distribution earlier, we can hypothesize that the age discrepancy may be due to the frequency of social interaction. Younger adults tend to have more social activities than older adults, they are also more likely to be exposed to potential virus carriers.
+
+```{r}
+ggplot(data, aes(x = Outcome)) + geom_bar(width = 0.5)
 ```
 
 # Reference
